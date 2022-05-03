@@ -10,7 +10,7 @@ module.exports = {
   target: "node",
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "index.js",
+    filename: "server.js",
   },
   resolve: {
     extensions: [".ts", ".js"],
