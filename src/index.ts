@@ -1,4 +1,4 @@
-import { app } from "./server";
+import { app, prisma } from "./server";
 
 const { PORT = 3030 } = process.env;
 
@@ -6,6 +6,17 @@ app.get("/", (req, res) => {
   res.status(302).header("location", "https://www.google.com").send();
 });
 
-app.listen(PORT, () => {
-  console.log(`Listening on http://localhost:${PORT}`);
-});
+async function main() {
+  app.listen(PORT, () => {
+    console.log(`Listening on http://localhost:${PORT}`);
+  });
+}
+
+prisma.$connect();
+main()
+  .catch((e) => {
+    throw e;
+  })
+  .finally(async () => {
+    prisma.$disconnect();
+  });
