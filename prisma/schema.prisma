@@ -9,3 +9,14 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model urlMap {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String
+  shortUrl  String   @unique
+  createdAt DateTime
+  // isActive                   Boolean
+  // expiresAfterNumberOfClicks Int?
+  // clicks                     Int
+  // expiresAt                  DateTime?
+}

@@ -1,10 +1,22 @@
-import { app, prisma } from "./server";
+import { app, prisma, router } from "./server";
+import { NOT_FOUND } from "./constants";
 
 const { PORT = 3030 } = process.env;
 
-app.get("/", (req, res) => {
-  res.status(302).header("location", "https://www.google.com").send();
+router.use(async (req, res) => {
+  if (req.url === "/") {
+    res.redirect("https://yyjlincoln.com");
+    return;
+  }
+  const route = await prisma.urlMap.findFirst({ where: { shortUrl: req.url } });
+  if (route) {
+    res.redirect(route.url);
+  } else {
+    res.send(NOT_FOUND);
+  }
 });
+
+app.use(router);
 
 async function main() {
   app.listen(PORT, () => {
