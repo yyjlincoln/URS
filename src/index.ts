@@ -21,6 +21,12 @@ app.use(async (req, res, next) => {
   });
   if (route) {
     res.redirect(route.url);
+    await prisma.history.create({
+      data: {
+        shortUrl: route.shortUrl,
+        createdAt: new Date(),
+      },
+    });
   } else {
     res.send(NOT_FOUND);
   }

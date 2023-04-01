@@ -20,3 +20,9 @@ model urlMap {
   // clicks                     Int
   // expiresAt                  DateTime?
 }
+
+model history {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  shortUrl  String
+  createdAt DateTime
+}
