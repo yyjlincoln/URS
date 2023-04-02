@@ -1,5 +1,5 @@
 import { app, prisma } from "./server";
-import { NOT_FOUND } from "./constants";
+import { INACTIVE, NOT_FOUND } from "./constants";
 
 const { PORT = 3030, CREATION_KEY } = process.env;
 
@@ -20,15 +20,29 @@ app.use(async (req, res, next) => {
     where: { shortUrl: req.path },
   });
   if (route) {
+    if (!route.isActive) {
+      res.send(INACTIVE);
+      return;
+    }
     res.redirect(route.url);
     await prisma.history.create({
       data: {
         shortUrl: route.shortUrl,
+        url: route.url,
+        isValid: true,
         createdAt: new Date(),
       },
     });
   } else {
     res.send(NOT_FOUND);
+    await prisma.history.create({
+      data: {
+        shortUrl: req.path,
+        url: "",
+        isValid: false,
+        createdAt: new Date(),
+      },
+    });
   }
 });
 
@@ -47,6 +61,7 @@ app.get("/create", async (req, res) => {
         url,
         shortUrl,
         createdAt: new Date(),
+        isActive: true,
       },
     });
     res.send("Successfully created.");
@@ -67,6 +82,7 @@ app.post("/create", (req, res) => {
       url,
       shortUrl,
       createdAt: new Date(),
+      isActive: true,
     },
   });
 });
