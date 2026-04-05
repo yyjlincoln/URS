@@ -28,7 +28,4 @@ COPY --from=build /app/dist/ ./dist/
 
 EXPOSE 3030
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "const http=require('http');http.get('http://localhost:3030/',r=>{process.exit(r.statusCode<400?0:1)}).on('error',()=>process.exit(1))"
-
 CMD ["node", "dist/server.js"]
