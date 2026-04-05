@@ -1,5 +1,6 @@
 # ---- Build stage ----
-FROM node:16-alpine AS build
+FROM node:16-bullseye-slim AS build
+RUN apt-get update && apt-get install -y openssl libssl-dev && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
@@ -16,7 +17,8 @@ RUN yarn prisma generate
 RUN yarn build
 
 # ---- Production stage ----
-FROM node:16-alpine
+FROM node:16-bullseye-slim
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --production
@@ -27,6 +29,6 @@ COPY --from=build /app/dist/ ./dist/
 EXPOSE 3030
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3030/ || exit 1
+  CMD node -e "const http=require('http');http.get('http://localhost:3030/',r=>{process.exit(r.statusCode<400?0:1)}).on('error',()=>process.exit(1))"
 
 CMD ["node", "dist/server.js"]
