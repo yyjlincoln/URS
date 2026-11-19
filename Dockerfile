@@ -1,6 +1,8 @@
 # ---- Build stage ----
 FROM node:16-bullseye-slim AS build
-RUN apt-get update && apt-get install -y openssl libssl-dev && rm -rf /var/lib/apt/lists/*
+# Debian 11 (bullseye) is EOL; its packages now live on archive.debian.org (deb.debian.org returns 404).
+RUN sed -i 's|http://deb.debian.org|http://archive.debian.org|g' /etc/apt/sources.list && \
+    apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y openssl libssl-dev && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
@@ -18,7 +20,8 @@ RUN yarn build
 
 # ---- Production stage ----
 FROM node:16-bullseye-slim
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN sed -i 's|http://deb.debian.org|http://archive.debian.org|g' /etc/apt/sources.list && \
+    apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --production
